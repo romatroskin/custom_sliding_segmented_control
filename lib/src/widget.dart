@@ -69,13 +69,17 @@ class CustomSlidingSegmentedControl<T> extends StatefulWidget {
     this.isStretch = false,
     this.fromMax = false,
     this.clipBehavior = Clip.none,
-    @Deprecated('use CustomSegmentSettings') this.splashColor = Colors.transparent,
-    @Deprecated('use CustomSegmentSettings') this.splashFactory = NoSplash.splashFactory,
-    @Deprecated('use CustomSegmentSettings') this.highlightColor = Colors.transparent,
+    @Deprecated('use CustomSegmentSettings')
+        this.splashColor = Colors.transparent,
+    @Deprecated('use CustomSegmentSettings')
+        this.splashFactory = NoSplash.splashFactory,
+    @Deprecated('use CustomSegmentSettings')
+        this.highlightColor = Colors.transparent,
     this.height = 40,
     this.controller,
     this.customSegmentSettings,
     this.onHoverSegment,
+    this.disabledValues,
   })  : assert(children.length != 0),
         super(key: key);
   final BoxDecoration? decoration;
@@ -106,11 +110,15 @@ class CustomSlidingSegmentedControl<T> extends StatefulWidget {
   final CustomSegmentedController<T>? controller;
   final CustomSegmentSettings? customSegmentSettings;
 
+  final List<T>? disabledValues;
+
   @override
-  _CustomSlidingSegmentedControlState<T> createState() => _CustomSlidingSegmentedControlState();
+  _CustomSlidingSegmentedControlState<T> createState() =>
+      _CustomSlidingSegmentedControlState();
 }
 
-class _CustomSlidingSegmentedControlState<T> extends State<CustomSlidingSegmentedControl<T>> {
+class _CustomSlidingSegmentedControlState<T>
+    extends State<CustomSlidingSegmentedControl<T>> {
   T? current;
   double? height;
   double offset = 0.0;
@@ -138,7 +146,8 @@ class _CustomSlidingSegmentedControlState<T> extends State<CustomSlidingSegmente
 
     final changeInitial = oldWidget.initialValue != widget.initialValue;
 
-    final changeChildrenLength = oldWidget.children.length != widget.children.length;
+    final changeChildrenLength =
+        oldWidget.children.length != widget.children.length;
 
     if (changeInitial || changeChildrenLength) {
       hasTouch = true;
@@ -202,7 +211,8 @@ class _CustomSlidingSegmentedControlState<T> extends State<CustomSlidingSegmente
   }
 
   void _controllerTap() {
-    if (widget.controller!.value == null || current == widget.controller!.value) {
+    if (widget.controller!.value == null ||
+        current == widget.controller!.value) {
       return;
     }
 
@@ -219,11 +229,15 @@ class _CustomSlidingSegmentedControlState<T> extends State<CustomSlidingSegmente
   }
 
   void onTapItem(MapEntry<T?, Widget> item) {
+    final List<T?> _keys = widget.children.keys.toList();
+    if (widget.disabledValues?.contains(_keys[_keys.indexOf(item.key)]) ??
+        false) return;
+
     if (!hasTouch) {
       setState(() => hasTouch = true);
     }
     setState(() => current = item.key);
-    final List<T?> _keys = widget.children.keys.toList();
+
     final _offset = computeOffset<T>(
       current: current,
       items: _keys,
@@ -243,9 +257,12 @@ class _CustomSlidingSegmentedControlState<T> extends State<CustomSlidingSegmente
       hoverColor: widget.customSegmentSettings?.hoverColor,
       overlayColor: widget.customSegmentSettings?.overlayColor,
       radius: widget.customSegmentSettings?.radius,
-      splashColor: widget.customSegmentSettings?.splashColor ?? widget.splashColor,
-      splashFactory: widget.customSegmentSettings?.splashFactory ?? widget.splashFactory,
-      highlightColor: widget.customSegmentSettings?.highlightColor ?? widget.highlightColor,
+      splashColor:
+          widget.customSegmentSettings?.splashColor ?? widget.splashColor,
+      splashFactory:
+          widget.customSegmentSettings?.splashFactory ?? widget.splashFactory,
+      highlightColor:
+          widget.customSegmentSettings?.highlightColor ?? widget.highlightColor,
       borderRadius: widget.customSegmentSettings?.borderRadius,
       child: Container(
         height: widget.height,
@@ -283,7 +300,9 @@ class _CustomSlidingSegmentedControlState<T> extends State<CustomSlidingSegmente
                       isCacheEnabled: true,
                     );
                   },
-                  child: widget.isStretch ? Expanded(child: _segmentItem(item)) : _segmentItem(item),
+                  child: widget.isStretch
+                      ? Expanded(child: _segmentItem(item))
+                      : _segmentItem(item),
                 ),
             ],
           ),
